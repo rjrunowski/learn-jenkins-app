@@ -20,37 +20,42 @@ pipeline {
                 '''
             }
         }*/
-        stage('Test') {
-            agent{
-                docker{
-                    image 'node:18-alpine'
-                    reuseNode true
+
+        stage('Stage Tests'){
+            parallel{
+                stage('Unit Test') {
+                    agent{
+                        docker{
+                            image 'node:18-alpine'
+                            reuseNode true
+                        }
+                    }
+                    steps {
+                        sh '''
+                            ls -lah
+                            test -f build/index.html
+                            npm run test
+                        '''
+                    }
                 }
-            }
-            steps {
-                sh '''
-                    ls -lah
-                    test -f build/index.html
-                    npm run test
-                '''
-            }
-        }
-        stage('E2E') {
-            agent{
-                docker{
-                    image 'mcr.microsoft.com/playwright:v1.62.0-noble'
-                    reuseNode true
-                    // args '-u root:root' // Don't do this. Bad Security.
+                stage('E2E') {
+                    agent{
+                        docker{
+                            image 'mcr.microsoft.com/playwright:v1.62.0-noble'
+                            reuseNode true
+                            // args '-u root:root' // Don't do this. Bad Security.
+                        }
+                    }
+                    steps {
+                        sh '''
+                            npm install serve
+                            npx playwright install chromium
+                            node_modules/.bin/serve -s build &
+                            sleep 2
+                            npx playwright test --reporter=html
+                        '''
+                    }
                 }
-            }
-            steps {
-                sh '''
-                    npm install serve
-                    npx playwright install chromium
-                    node_modules/.bin/serve -s build &
-                    sleep 10
-                    npx playwright test --reporter=html
-                '''
             }
         }
     }
