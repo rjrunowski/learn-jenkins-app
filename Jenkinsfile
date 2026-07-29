@@ -58,7 +58,7 @@ pipeline {
                             node_modules/.bin/serve -s build &
                             sleep .25
                             npx playwright test --reporter=html
-                            System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "sandbox allow-scripts;")
+                            #  Need to make this work.... System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "sandbox allow-scripts;")
 
                         '''
                     }
