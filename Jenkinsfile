@@ -31,12 +31,16 @@ pipeline {
                 sh '''
                     ls -lah
                     test -f build/index.html
-                    node --version
-                    npm --version
-                    npm ci
                     npm run test
                 '''
             }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'build/**', allowEmptyArchive: true
+            junit 'test-results/junit.xml'
         }
     }
 }
