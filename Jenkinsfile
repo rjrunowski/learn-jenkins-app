@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
+        /*stage('Build') {
             agent{
                 docker{
                     image 'node:18-alpine'
@@ -19,7 +19,7 @@ pipeline {
                     ls -lah
                 '''
             }
-        }
+        }*/
         stage('Test') {
             agent{
                 docker{
@@ -58,7 +58,7 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'build/**', allowEmptyArchive: true
-            junit 'test-results/junit.xml'
+            junit 'jest-results/junit.xml'
         }
     }
 }
