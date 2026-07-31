@@ -84,7 +84,7 @@ pipeline {
             }
             steps {
                 sh '''
-                    npm install netlify-cli@20.1.1 
+                    npm install netlify-cli
                     node-modules/.bin/netlify --version
                     echo "Deploying to Netlify Site ID: ${NETLIFY_SITE_ID}"
                 '''
