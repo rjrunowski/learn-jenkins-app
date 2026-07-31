@@ -82,14 +82,14 @@ pipeline {
                     reuseNode true
                 }
             }
-            steps {
-                sh '''
-                    apt-get update && apt-get install -y python3 make g++
-                    npm install netlify-cli
-                    node-modules/.bin/netlify --version
-                    echo "Deploying to Netlify Site ID: ${NETLIFY_SITE_ID}"
-                '''
-            }
+            stage('Deploy') {
+        steps {
+            sh '''
+                npm install netlify-cli
+                node_modules/.bin/netlify --version
+                echo "Deploying to Netlify Site ID: ${NETLIFY_SITE_ID}"
+                # node_modules/.bin/netlify deploy --prod --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID
+            '''
         }
     }
 }
