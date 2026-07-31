@@ -84,6 +84,7 @@ pipeline {
             }
             steps {
                 sh '''
+                    apt-get update && apt-get install -y python3 make g++
                     npm install netlify-cli
                     node-modules/.bin/netlify --version
                     echo "Deploying to Netlify Site ID: ${NETLIFY_SITE_ID}"
