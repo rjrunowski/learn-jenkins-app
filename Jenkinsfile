@@ -61,7 +61,7 @@ pipeline {
                             npm install serve
                             npx playwright install chromium
                             node_modules/.bin/serve -s build &
-                            sleep .25
+                            # sleep .25
                             npx playwright test --reporter=html
                             #  Need to make this work.... System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "sandbox allow-scripts;")
 
@@ -89,7 +89,7 @@ pipeline {
                     node_modules/.bin/netlify --version
                     echo "Deploying to Netlify Site ID: ${NETLIFY_SITE_ID}"
                     node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --prod --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID
+                    node_modules/.bin/netlify deploy --prod --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID --skip-functions-cache
                 '''
             } 
         }
