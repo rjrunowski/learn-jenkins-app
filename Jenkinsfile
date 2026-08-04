@@ -69,7 +69,7 @@ pipeline {
                     }
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Local Report', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
                 }
@@ -93,6 +93,30 @@ pipeline {
                     node_modules/.bin/netlify deploy --prod --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID --skip-functions-cache
                 '''
             } 
+        }
+        stage('Prod E2E') {
+            agent{
+                docker{
+                    image 'mcr.microsoft.com/playwright:v1.62.0-noble'
+                    reuseNode true
+                    // args '-u root:root' // Don't do this. Bad Security.
+                }
+            }
+            environment {
+                CI_ENVIRONMENT_URL = 'https://runowski.netlify.app'
+            }
+            steps {
+                sh '''
+                    npx playwright install chromium
+                    npx playwright test --reporter=html
+
+                '''
+            }
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E Report', reportTitles: '', useWrapperFileDirectly: true])
+                }
+            }
         }
     }
 }
