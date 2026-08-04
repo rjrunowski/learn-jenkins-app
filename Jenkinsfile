@@ -95,6 +95,16 @@ pipeline {
             } 
         }
         
+        stage('approval') {
+            steps {
+                // 1 Minute Timeout
+                timeout(1) {
+                    input message: 'Ready to Deploy?', ok: 'Yes, I am ready to deploy'
+                }
+                
+            }
+        }
+        
         stage('Deploy Prod') {
             agent{
                 docker{
