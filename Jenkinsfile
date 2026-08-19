@@ -77,7 +77,7 @@ pipeline {
             }
         }
         
-        stage('Deploy Stage') {
+        stage('Deploy Stage and Test') {
             agent {
                 docker {
                     image 'learn-playwright'
