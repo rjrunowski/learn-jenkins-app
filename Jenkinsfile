@@ -93,6 +93,34 @@ pipeline {
                     node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
                 '''
             } 
+            script{
+                env.STAGE_DEPLOY_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout: true).trim()
+            }
+        }
+
+        stage('Stage E2E') {
+            agent{
+                docker{
+                    image 'mcr.microsoft.com/playwright:v1.62.0-noble'
+                    reuseNode true
+                    // args '-u root:root' // Don't do this. Bad Security.
+                }
+            }
+            environment {
+                CI_ENVIRONMENT_URL = env.STAGE_DEPLOY_URL
+            }
+            steps {
+                sh '''
+                    npx playwright install chromium
+                    npx playwright test --reporter=html
+
+                '''
+            }
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Stage E2E Report', reportTitles: '', useWrapperFileDirectly: true])
+                }
+            }
         }
         
         stage('approval') {
@@ -144,7 +172,7 @@ pipeline {
             }
             post {
                 always {
-                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E Report', reportTitles: '', useWrapperFileDirectly: true])
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Prod E2E Report', reportTitles: '', useWrapperFileDirectly: true])
                 }
             }
         }
