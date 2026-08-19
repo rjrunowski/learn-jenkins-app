@@ -77,27 +77,28 @@ pipeline {
         }
         
         stage('Deploy Stage') {
-            agent{
-                docker{
+            agent {
+                docker {
                     image 'mcr.microsoft.com/playwright:v1.62.0-noble'
                     reuseNode true
-                    // args '-u root:root' // Don't do this. Bad Security.
                 }
-            }
-            environment {
-                CI_ENVIRONMENT_URL = 'STAGING_URL_TO_BE_SET'
             }
             steps {
                 sh '''
-                    npm install netlify-cli node-jq
+                    npm install netlify-cli
                     node_modules/.bin/netlify --version
                     echo "Deploying to Stage Site ID: ${NETLIFY_SITE_ID}"
                     node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
-                    CI_ENVIRONMENT_URL=$node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
+                    node_modules/.bin/netlify deploy --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID --json > deploy-output.json
+                    cat deploy-output.json
+                '''
+                script {
+                    env.CI_ENVIRONMENT_URL = sh(script: "jq -r '.deploy_url' deploy-output.json", returnStdout: true).trim()
+                }
+                echo "Stage URL: ${env.CI_ENVIRONMENT_URL}"
+                sh '''
                     npx playwright install chromium
                     npx playwright test --reporter=html
-
                 '''
             }
             post {
