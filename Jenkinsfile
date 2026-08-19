@@ -85,17 +85,16 @@ pipeline {
         stage('Deploy Stage') {
             agent {
                 docker {
-                    image 'mcr.microsoft.com/playwright:v1.62.0-noble'
+                    image 'learn-playwright'
                     reuseNode true
                 }
             }
             steps {
                 sh '''
-                    npm install netlify-cli node-jq
-                    node_modules/.bin/netlify --version
+                    netlify --version
                     echo "Deploying to Stage Site ID: ${NETLIFY_SITE_ID}"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID --json > deploy-output.json
+                    netlify status
+                    netlify deploy --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID --json > deploy-output.json
                     cat deploy-output.json
                 '''
                 script {
@@ -117,7 +116,7 @@ pipeline {
         stage('Deploy Prod') {
             agent{
                 docker{
-                    image 'mcr.microsoft.com/playwright:v1.62.0-noble'
+                    image 'learn-playwright'
                     reuseNode true
                     // args '-u root:root' // Don't do this. Bad Security.
                 }
@@ -129,10 +128,10 @@ pipeline {
                 sh '''
                     npm install netlify-cli
                     npx playwright install chromium
-                    node_modules/.bin/netlify --version
+                    netlify --version
                     echo "Deploying to Netlify Site ID: ${NETLIFY_SITE_ID}"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --prod --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID --skip-functions-cache
+                    netlify status
+                    netlify deploy --prod --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID --skip-functions-cache
                     npx playwright test --reporter=html
 
                 '''
