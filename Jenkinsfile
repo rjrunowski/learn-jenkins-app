@@ -126,9 +126,6 @@ pipeline {
             }
             steps {
                 sh '''
-                    npm install netlify-cli
-                    npx playwright install chromium
-                    netlify --version
                     echo "Deploying to Netlify Site ID: ${NETLIFY_SITE_ID}"
                     netlify status
                     netlify deploy --prod --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID --skip-functions-cache
