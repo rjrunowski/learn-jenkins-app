@@ -52,7 +52,7 @@ pipeline {
                 stage('E2E') {
                     agent{
                         docker{
-                            image 'mcr.microsoft.com/playwright:v1.62.0-noble'
+                            image 'learn-playwright'
                             reuseNode true
                             // args '-u root:root' // Don't do this. Bad Security.
                         }
@@ -121,6 +121,7 @@ pipeline {
             }
             steps {
                 sh '''
+                    npx playwright install chromium
                     echo "Deploying to Netlify Site ID: ${NETLIFY_SITE_ID}"
                     netlify status
                     netlify deploy --prod --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID --skip-functions-cache
