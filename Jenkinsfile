@@ -77,8 +77,8 @@ pipeline {
         }
         
         stage('Deploy Stage') {
-            agent{
-                docker{
+            agent {
+                docker {
                     image 'node:18-alpine'
                     reuseNode true
                 }
@@ -90,11 +90,11 @@ pipeline {
                     echo "Deploying to Stage Site ID: ${NETLIFY_SITE_ID}"
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
-                    node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
                 '''
-            } 
-            script{
-                env.STAGE_DEPLOY_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout: true).trim()
+                script {
+                    env.STAGE_DEPLOY_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout: true).trim()
+                }
+                echo "Stage URL: ${env.STAGE_DEPLOY_URL}"
             }
         }
 
@@ -107,7 +107,7 @@ pipeline {
                 }
             }
             environment {
-                CI_ENVIRONMENT_URL = env.STAGE_DEPLOY_URL
+                CI_ENVIRONMENT_URL = "${env.STAGE_DEPLOY_URL}"
             }
             steps {
                 sh '''
