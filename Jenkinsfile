@@ -77,10 +77,11 @@ pipeline {
         }
         
         stage('Deploy Stage') {
-            agent {
-                docker {
-                    image 'node:18-alpine'
+            agent{
+                docker{
+                    image 'mcr.microsoft.com/playwright:v1.62.0-noble'
                     reuseNode true
+                    // args '-u root:root' // Don't do this. Bad Security.
                 }
             }
             steps {
@@ -90,27 +91,7 @@ pipeline {
                     echo "Deploying to Stage Site ID: ${NETLIFY_SITE_ID}"
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
-                '''
-                script {
-                    env.STAGE_DEPLOY_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout: true).trim()
-                }
-                echo "Stage URL: ${env.STAGE_DEPLOY_URL}"
-            }
-        }
-
-        stage('Stage E2E') {
-            agent{
-                docker{
-                    image 'mcr.microsoft.com/playwright:v1.62.0-noble'
-                    reuseNode true
-                    // args '-u root:root' // Don't do this. Bad Security.
-                }
-            }
-            environment {
-                CI_ENVIRONMENT_URL = "${env.STAGE_DEPLOY_URL}"
-            }
-            steps {
-                sh '''
+                    CI_ENVIRONMENT_URL=$node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
                     npx playwright install chromium
                     npx playwright test --reporter=html
 
