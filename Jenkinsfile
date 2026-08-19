@@ -91,10 +91,9 @@ pipeline {
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID --json > deploy-output.json
                     cat deploy-output.json
-                    apt-get install -y jq
                 '''
                 script {
-                    env.CI_ENVIRONMENT_URL = sh(script: "jq -r '.deploy_url' deploy-output.json", returnStdout: true).trim()
+                    env.CI_ENVIRONMENT_URL = sh(script: "node -e \"console.log(require('./deploy-output.json').deploy_url)\"", returnStdout: true).trim()
                 }
                 echo "Stage URL: ${env.CI_ENVIRONMENT_URL}"
                 sh '''
