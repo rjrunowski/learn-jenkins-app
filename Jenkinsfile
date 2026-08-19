@@ -132,27 +132,8 @@ pipeline {
                 
             }
         }
-        
-        stage('Deploy Prod') {
-            agent{
-                docker{
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh '''
-                    echo "small change"
-                    npm install netlify-cli
-                    node_modules/.bin/netlify --version
-                    echo "Deploying to Netlify Site ID: ${NETLIFY_SITE_ID}"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --prod --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID --skip-functions-cache
-                '''
-            } 
-        }
 
-        stage('Prod E2E') {
+        stage('Deploy Prod') {
             agent{
                 docker{
                     image 'mcr.microsoft.com/playwright:v1.62.0-noble'
@@ -165,7 +146,12 @@ pipeline {
             }
             steps {
                 sh '''
+                    npm install netlify-cli
                     npx playwright install chromium
+                    node_modules/.bin/netlify --version
+                    echo "Deploying to Netlify Site ID: ${NETLIFY_SITE_ID}"
+                    node_modules/.bin/netlify status
+                    node_modules/.bin/netlify deploy --prod --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID --skip-functions-cache
                     npx playwright test --reporter=html
 
                 '''
