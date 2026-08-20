@@ -4,6 +4,7 @@ pipeline {
     environment {
         NETLIFY_SITE_ID = '8327aa66-b9f1-489f-ab8f-f7d0e9f04b5c'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
+        
         REACT_APP_VERSION = "1.0.$BUILD_NUMBER"
     }
 
@@ -14,10 +15,11 @@ pipeline {
                     image 'amazon/aws-cli:latest'
                     args "--entrypoint=''"
                 }
-            }
-            steps{
+            }  
+            withCredentials([usernamePassword(credentialsId: 'my-aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                 sh '''
                     aws --version
+                    aws s3 ls  
                 '''
             }
         }
