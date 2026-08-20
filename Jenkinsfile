@@ -9,29 +9,7 @@ pipeline {
     }
 
     stages {
-        stage('AWS'){
-            environment{
-                AWS_S3_BUCKET = 'learn-jenkins-rjrunowski-20260820'
-            }
-            agent{
-                docker{
-                    image 'amazon/aws-cli:latest'
-                    args "--entrypoint=''"
-                }
-            }  
-            steps{
-                withCredentials([usernamePassword(credentialsId: 'my-aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
-                    sh '''
-                        aws --version
-                        echo "Hello S3!" > index.html
-                        aws s3 ls  
-                        aws s3 cp index.html s3://${AWS_S3_BUCKET}/index.html
-                        aws s3 ls  
-                    '''
-                }
-            }
-        }
-        /*stage('Build') {
+        stage('Build') {
             agent{
                 docker{
                     image 'node:18-alpine'
@@ -50,6 +28,29 @@ pipeline {
             }
         }
 
+        
+        stage('AWS'){
+            environment{
+                AWS_S3_BUCKET = 'learn-jenkins-rjrunowski-20260820'
+            }
+            agent{
+                docker{
+                    image 'amazon/aws-cli:latest'
+                    args "--entrypoint=''"
+                }
+            }  
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'my-aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                    sh '''
+                        aws --version
+                        aws s3 sync build s3://${AWS_S3_BUCKET}
+                        aws s3 ls  
+                    '''
+                }
+            }
+        }
+
+        /*
         stage('Stage Tests'){
             parallel{
                 stage('Unit Test') {
@@ -157,6 +158,7 @@ pipeline {
                     publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Prod E2E Report', reportTitles: '', useWrapperFileDirectly: true])
                 }
             }
-        }*/
+        }
+        */
     }
 }
